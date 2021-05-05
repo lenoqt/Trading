@@ -15,24 +15,24 @@ class Binance:
     endTime: int
     limit: int
 
-
-    def __init__(self, api_key,
-                 symbol, interval,
+    def __init__(self, symbol,
+                 api_key, interval,
                  startTime, endTime, limit = 500) -> None:
         self.symbol = symbol
+        self.api_key = api_key
         self.interval = interval
         self.startTime = startTime
         self.endTime = endTime
         self.limit = limit
-        self.api_key = api_key
     
-    def api_handler(self, url:str, timer:int, retries:int=5) -> Union[Callable[Any], requests.models.Response]:
+    def api_handler(self, url:str, timer:int=5, retries:int=5) -> Union[Callable[[Any], requests.models.Response] , requests.models.Response, None]:
+        r = None
         try:
             r = requests.get(url, headers={'X-MBX-APIKEY':self.api_key})
             if r.status_code != 200:
                 raise HTTPError('Not expected API response')
         except HTTPError as err:
-            if r.status_code == 429 and retries =! 0:
+            if r.status_code == 429 and retries != 0:
                 print('\n\r{} API Response: {}... {}secs'.format(err, r.status_code, round(timer, 2)))
                 time.sleep(timer)
                 timer += 5
@@ -55,9 +55,9 @@ class Binance:
     
     def kline(self) -> pd.DataFrame:
         url = 'https://api.binance.com/api/v3/klines?symbol='+self.symbol+'&interval='+self.interval
-        candlesticks = requests.get(url)
-        if candlesticks.status_code == 200:
-            return pd.DataFrame(candlesticks.json())
-        elif candlesticks.status_code == 404:
-            raise HTTPError('Forbidden')
+        candlesticks = self.api_handler(url)
+        headers = ['Open time', 'Open', 'High', 'Low', 'Close', 'Volume',
+                   'Close time', 'Quote asset volume', 'No of trades',
+                   'Taker buy base asset volume', 'Taker quote asset volume', 'Ignore']
+        return pd.DataFrame(candlesticks.json(), columns=headers)
 
