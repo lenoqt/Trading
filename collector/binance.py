@@ -1,10 +1,29 @@
 import requests
-import json
 import time
 from requests.exceptions import HTTPError
 import pandas as pd
-from typing import Any, Union, Callable
-import re
+from typing import Any, Dict, Union, Callable
+
+
+BASE_URL = 'https://api.binance.com'
+#Endpoints (GET)
+TEST = '/api/v3/ping'
+TIME = '/api/v3/time'
+INFO = '/api/v3/exchangeInfo'
+ORDERBOOK = '/api/v3/depth'
+TRADES = '/api/v3/trades'
+HISTORICAL = '/api/v3/historicalTrades'
+AGGREGATED = '/api/v3/aggTrades'
+KLINES = '/api/v3/klines'
+AVGPRICE = '/api/v3/avgPrice'
+DAYSTATS = '/api/v3/ticker/24hr'
+SYMBOLTPRICE = '/api/v3/ticker/price'
+SYMBOOKT = '/api/v3/ticker/bookTicker'
+
+#Intervals for public API
+INTERVALS = ['1m', '3m', '5m', '15m', '30m',
+             '1h', '2h', '4h', '6h', '8h', '12h',
+             '1d', '3d', '1w', '1M']
 
 class Binance:
     
@@ -20,7 +39,7 @@ class Binance:
                  startTime, endTime, limit = 500) -> None:
         self.symbol = symbol
         self.api_key = api_key
-        self.interval = interval
+        self.interval = interval if interval in INTERVALS else '4h'
         self.startTime = startTime
         self.endTime = endTime
         self.limit = limit
@@ -54,10 +73,38 @@ class Binance:
             return r
     
     def kline(self) -> pd.DataFrame:
-        url = 'https://api.binance.com/api/v3/klines?symbol='+self.symbol+'&interval='+self.interval
+        url = '%s%s?symbol=%s&interval=%s' % (BASE_URL, KLINES, self.symbol, self.interval)
         candlesticks = self.api_handler(url)
         headers = ['Open time', 'Open', 'High', 'Low', 'Close', 'Volume',
                    'Close time', 'Quote asset volume', 'No of trades',
                    'Taker buy base asset volume', 'Taker quote asset volume', 'Ignore']
         return pd.DataFrame(candlesticks.json(), columns=headers)
+
+    def test_api(self) -> int:
+        url = '%s%s' % (BASE_URL, TEST)
+        test = self.api_handler(url)
+        return test.status_code
+
+    def check_time(self) -> Dict[str, int]:
+        url = '%s%s' % (BASE_URL, TIME)
+        server_time = self.api_handler(url)
+        return server_time.json()
+
+    def info(self) -> Dict[Any, Any]:
+        url = '%s%s' % (BASE_URL, INFO)
+        info = self.api_handler(url)
+        return info.json()
+
+    def order_book(self) -> pd.DataFrame:
+        url = '%s%s?symbol=%s&limit=%s' % (BASE_URL, ORDERBOOK, self.symbol, self.limit)
+        book = self.api_handler(url)
+        return pd.DataFrame.from_dict(book.json())
+
+    def trades(self, historical=False) -> pd.DataFrame:
+        url = '%s%s?symbol=%s&limit=%s' % (BASE_URL, 
+                                           HISTORICAL if historical else TRADES, 
+                                           self.symbol, self.limit)
+        trades = self.api_handler(url)
+        headers = ["id", "price", "qty", "quoteQty", "time", "isBuyerMaker", "isBestMatch"]
+        return pd.DataFrame(trades.json(), columns=headers)
 
