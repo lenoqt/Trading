@@ -1,62 +1,48 @@
-
-from trading.utils.handlers import api_handler
+from typing import Any, Dict, Union
+from requests import Response
 from trading.utils.endpoints import BinanceEndpoint
-from typing import Any, Dict
+from trading.utils.handlers import api_handler
 
 
 __all__ = ['Binance']
+
+
 
 class Binance:
     
     api_key: str
     symbol: str
-    interval: str
+    interval: BinanceEndpoint
     startTime: int
     endTime: int
     limit: int
-
+    
     def __init__(self, symbol,
-                 api_key, interval,
-                 startTime, endTime, limit = 500) -> None:
+                 api_key, startTime, endTime, 
+                 limit = 500, interval = f'{BinanceEndpoint._4H}') -> None:
         self.symbol = symbol
-        self.api_key = api_key
-        self.interval = interval if interval in BinanceEndpoint.INTERVALS else '4h'
+        self.api_key = api_key 
+        self.interval = interval
         self.startTime = startTime
         self.endTime = endTime
         self.limit = limit
     
-    
-    def kline(self) -> Dict:
-        url = '%s%s?symbol=%s&interval=%s' % (BinanceEndpoint.BASE_URL, 
-                BinanceEndpoint.KLINES, self.symbol, self.interval)
-        candlesticks = api_handler(url)
-        return candlesticks
+    def public(self, endpoint:BinanceEndpoint) -> Union[Response, Any, Dict]:
+        """
+        Method to extract data from public APIs from Binance
+        """
 
-    def test_api(self) -> int:
-        url = '%s%s' % (BinanceEndpoint.BASE_URL, BinanceEndpoint.TEST)
-        test = api_handler(url)
-        return test.status_code
-
-    def check_time(self) -> Dict[str, int]:
-        url = '%s%s' % (BinanceEndpoint.BASE_URL, BinanceEndpoint.TIME)
-        server_time = api_handler(url)
-        return server_time.json()
-
-    def info(self) -> Dict[Any, Any]:
-        url = '%s%s' % (BinanceEndpoint.BASE_URL, BinanceEndpoint.INFO)
-        info = api_handler(url)
-        return info.json()
-
-    def order_book(self) -> pd.DataFrame:
-        url = '%s%s?symbol=%s&limit=%s' % (BinanceEndpoint.BASE_URL, BinanceEndpoint.ORDERBOOK, self.symbol, self.limit)
-        book = api_handler(url)
-        return pd.DataFrame.from_dict(book.json())
-
-    def trades(self, historical=False) -> pd.DataFrame:
-        url = '%s%s?symbol=%s&limit=%s' % (BinanceEndpoint.BASE_URL, 
-                                           BinanceEndpoint.HISTORICAL if historical else BinanceEndpoint.TRADES, 
-                                           self.symbol, self.limit)
-        trades = api_handler(url)
-        headers = ["id", "price", "qty", "quoteQty", "time", "isBuyerMaker", "isBestMatch"]
-        return pd.DataFrame(trades.json(), columns=headers)
-
+        if BinanceEndpoint.KLINE_FQDN:
+            url = endpoint % (self.symbol, self.interval) 
+            return api_handler(url=url, api_key=self.api_key)
+        elif BinanceEndpoint.TEST_FQDN or \
+                BinanceEndpoint.TIME_FQDN or \
+                BinanceEndpoint.INFO_FQDN:
+            return api_handler(url=f"{endpoint}", api_key=self.api_key) 
+        elif BinanceEndpoint.ORDERBOOK_FQDN or \
+                BinanceEndpoint.HISTORICAL_FQDN or \
+                BinanceEndpoint.TRADES_FQDN:
+            url = endpoint % (self.symbol, self.limit)
+            return api_handler(url=url, api_key=self.api_key)
+        else:
+            raise ValueError('Value %s is not a public endpoint' % endpoint)
