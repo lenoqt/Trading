@@ -13,18 +13,18 @@ class Binance:
     api_key: str
     symbol: str
     interval: BinanceEndpoint
-    startTime: int
-    endTime: int
+    start_time: int
+    end_time: int
     limit: int
     
     def __init__(self, symbol,
-                 api_key, startTime, endTime, 
+                 api_key, start_time=0, end_time=0, 
                  limit = 500, interval = f'{BinanceEndpoint._4H}') -> None:
         self.symbol = symbol
         self.api_key = api_key 
         self.interval = interval
-        self.startTime = startTime
-        self.endTime = endTime
+        self.start_time = start_time
+        self.end_time = end_time
         self.limit = limit
     
     def public(self, endpoint:BinanceEndpoint) -> Union[Response, Any, Dict]:
@@ -33,8 +33,13 @@ class Binance:
         """
 
         if BinanceEndpoint.KLINE_FQDN:
-            url = endpoint % (self.symbol, self.interval) 
-            return api_handler(url=url, api_key=self.api_key)
+            url = endpoint.format(self.symbol, self.interval,self.start_time, self.end_time, self.limit) 
+            data = api_handler(url=url, api_key=self.api_key)
+            columns = ('Open time','Open High','Low Close',
+                       'Volume','Close time','Quote asset volume'
+                       'Number of trades','Taker buy base asset volume',
+                       'Taker buy quote asset volume','Ignore')
+            return dict(zip(columns, zip(*data)))
         elif BinanceEndpoint.TEST_FQDN or \
                 BinanceEndpoint.TIME_FQDN or \
                 BinanceEndpoint.INFO_FQDN:

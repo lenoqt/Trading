@@ -21,13 +21,13 @@ class BinanceEndpoint(str, Enum):
     SYMBOLTPRICE = '/api/v3/ticker/price'
     SYMBOOKT = '/api/v3/ticker/bookTicker'
     # FQDNs
-    KLINE_FQDN = BASE_URL + KLINES + '?symbol=%s&interval=%s'
+    KLINE_FQDN = BASE_URL + KLINES + '?symbol={}&interval={}&startTime={}&endTime={}&limit={}'
     TEST_FQDN = BASE_URL + TEST 
     TIME_FQDN = BASE_URL + TIME 
     INFO_FQDN = BASE_URL + INFO 
-    ORDERBOOK_FQDN = BASE_URL + ORDERBOOK + 'symbol=%s&limit=%s' 
-    HISTORICAL_FQDN = BASE_URL + HISTORICAL + '?symbol=%s&limit=%s' 
-    TRADES_FQDN = BASE_URL + TRADES + '?symbol=%s&limit=%s' 
+    ORDERBOOK_FQDN = BASE_URL + ORDERBOOK + '?symbol={}&limit={}' 
+    HISTORICAL_FQDN = BASE_URL + HISTORICAL + '?symbol={}&limit={}' 
+    TRADES_FQDN = BASE_URL + TRADES + '?symbol={}&limit={}' 
     # Intervals for public API 
     
     _1MIN = '1m'
