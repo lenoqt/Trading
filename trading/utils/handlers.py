@@ -3,7 +3,7 @@ import hashlib
 import hmac
 import base64
 import re
-from typing import Any, AnyStr, Dict, Literal, Union, overload
+from typing import Any, Dict, Union
 from time import time
 from requests.exceptions import HTTPError
 from mysql.connector.errors import DatabaseError, PoolError

@@ -11,6 +11,7 @@ __all__ = ['Binance']
 class Binance:
     
     api_key: str
+    secret: str
     symbol: str
     interval: BinanceEndpoint
     start_time: int
@@ -18,36 +19,39 @@ class Binance:
     limit: int
     
     def __init__(self, symbol,
-                 api_key, start_time=0, end_time=0, 
+                 api_key, secret, start_time=0, end_time=0, 
                  limit = 500, interval = f'{BinanceEndpoint._4H}') -> None:
+        if start_time >= end_time:
+            raise ValueError("Value {}, can't be greater than {}".format(start_time, end_time))
         self.symbol = symbol
-        self.api_key = api_key 
+        self.api_key = api_key
+        self.secret = secret
         self.interval = interval
         self.start_time = start_time
         self.end_time = end_time
         self.limit = limit
     
-    def public(self, endpoint:BinanceEndpoint) -> Union[Response, Any, Dict]:
+    def public(self, endpoint: BinanceEndpoint, method: str) -> Union[Response, Any, Dict]:
         """
         Method to extract data from public APIs from Binance
         """
 
         if BinanceEndpoint.KLINE_FQDN:
             url = endpoint.format(self.symbol, self.interval,self.start_time, self.end_time, self.limit) 
-            data = api_handler(url=url, api_key=self.api_key)
-            columns = ('Open time','Open High','Low Close',
+            data = api_handler(method, url, self.api_key, self.secret)
+            columns = ['Open time','Open High','Low Close',
                        'Volume','Close time','Quote asset volume'
                        'Number of trades','Taker buy base asset volume',
-                       'Taker buy quote asset volume','Ignore')
+                       'Taker buy quote asset volume','Ignore']
             return dict(zip(columns, zip(*data)))
         elif BinanceEndpoint.TEST_FQDN or \
                 BinanceEndpoint.TIME_FQDN or \
                 BinanceEndpoint.INFO_FQDN:
-            return api_handler(url=f"{endpoint}", api_key=self.api_key) 
+            return api_handler(method, endpoint.value, self.api_key, self.secret ) 
         elif BinanceEndpoint.ORDERBOOK_FQDN or \
                 BinanceEndpoint.HISTORICAL_FQDN or \
                 BinanceEndpoint.TRADES_FQDN:
-            url = endpoint % (self.symbol, self.limit)
-            return api_handler(url=url, api_key=self.api_key)
+            url = endpoint.format(self.symbol, self.limit)
+            return api_handler(method, url, self.api_key, self.secret )
         else:
-            raise ValueError('Value %s is not a public endpoint' % endpoint)
+            raise ValueError('Value %s is not a public endpoint' % endpoint.value)
