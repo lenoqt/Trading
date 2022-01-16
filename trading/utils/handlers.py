@@ -3,7 +3,7 @@ import hashlib
 import hmac
 import base64
 import re
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union, Optional
 from time import time
 from requests.exceptions import HTTPError
 
@@ -11,16 +11,20 @@ __all__ = ['api_handler', 'signature']
 
 def api_handler(method: str,
                 endpoint: str,
-                api_key: str,
-                secret: str,
+                api_key: Optional[str] = None,
+                secret: Optional[str] = None,
                 timer:int=5, 
                 retries:int=5) -> Union[Response, Any, Dict]:
     r = {}
     try:
         message = re.search(r'\?([\s\S]*)$', endpoint)
-        sig = signature(secret, message.group(1)) # type: ignore
-        endpoint = endpoint + f"&signature={sig}"
-        r = request(method, endpoint, headers={'X-MBX-APIKEY': api_key})
+        if secret is not None:
+            sig = signature(secret, message.group(1)) # type: ignore
+            endpoint = endpoint + f"&signature={sig}"
+        header = {}
+        if api_key is not None:
+            header['X-MBX-APIKEY'] = api_key
+        r = request(method, endpoint, headers=header)
         r = r.json()
         if r.status_code != 200:
             r.raise_for_status()

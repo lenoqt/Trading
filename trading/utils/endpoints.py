@@ -1,9 +1,14 @@
 from enum import Enum
 
 
-__all__ = ['BinanceEndpoint']
+__all__ = ['BinanceEndpoints', 'BinanceIntervals']
 
-class BinanceEndpoint(str, Enum):
+class BaseEnum(str, Enum):
+
+    def describe(self):
+        return self.name, self.value
+
+class BinanceEndpoints(BaseEnum):
 
     BASE_URL = 'https://api.binance.com'
     # Endpoints (GET) 
@@ -18,7 +23,7 @@ class BinanceEndpoint(str, Enum):
     _AVGPRICE = '/api/v3/avgPrice'
     _DAYSTATS = '/api/v3/ticker/24hr'
     _SYMBOLTPRICE = '/api/v3/ticker/price'
-    _SYMBOOKT = '/api/v3/ticker/bookTicker'
+    _SYMBOOKT = '/api/v3/ticker/bookTicker'
     # FQDNs
     KLINE = BASE_URL + _KLINES + '?symbol={}&interval={}&startTime={}&endTime={}&limit={}'
     TEST = BASE_URL + _TEST 
@@ -27,8 +32,9 @@ class BinanceEndpoint(str, Enum):
     ORDERBOOK = BASE_URL + _ORDERBOOK + '?symbol={}&limit={}' 
     HISTORICAL = BASE_URL + _HISTORICAL + '?symbol={}&limit={}' 
     TRADES = BASE_URL + _TRADES + '?symbol={}&limit={}' 
-    # Intervals for public API 
-    
+
+class BinanceIntervals(BaseEnum):
+# Intervals for public API 
     INTERVAL_1MIN = '1m'
     INTERVAL_3MIN = '3m'
     INTERVAL_5MIN = '5m'
@@ -45,6 +51,3 @@ class BinanceEndpoint(str, Enum):
     INTERVAL_1W = '1w'
     INTERVAL_1M = '1M'
     
-    def describe(self):
-        return self.name, self.value
-
