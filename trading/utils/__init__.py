@@ -1,4 +1,3 @@
-# type: ignore
 from .handlers import * 
 from .endpoints import *
 

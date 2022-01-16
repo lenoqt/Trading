@@ -1,5 +1,7 @@
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union, Optional
+from dataclasses import dataclass, field
 from requests import Response
+from datetime import datetime
 from trading.utils.endpoints import BinanceEndpoint
 from trading.utils.handlers import api_handler
 
@@ -7,51 +9,40 @@ from trading.utils.handlers import api_handler
 __all__ = ['Binance']
 
 
-
+@dataclass
 class Binance:
     
-    api_key: str
-    secret: str
     symbol: str
-    interval: BinanceEndpoint
-    start_time: int
-    end_time: int
-    limit: int
+    start_time: datetime 
+    end_time: datetime
+    interval: BinanceEndpoint = field(default=BinanceEndpoint.INTERVAL_4H, repr=True)
+    api_key: Optional[str] = None
+    secret: Optional[str] = None
+    limit: int = 1500
     
-    def __init__(self, symbol,
-                 api_key, secret, start_time=0, end_time=0, 
-                 limit = 500, interval = f'{BinanceEndpoint._4H}') -> None:
-        if start_time >= end_time:
-            raise ValueError("Value {}, can't be greater than {}".format(start_time, end_time))
-        self.symbol = symbol
-        self.api_key = api_key
-        self.secret = secret
-        self.interval = interval
-        self.start_time = start_time
-        self.end_time = end_time
-        self.limit = limit
+    def __post__init__(self):
+        if self.start_time >= self.end_time:
+            raise ValueError(f"Value {self.start_time}, can't be greater than {self.end_time}")
     
     def public(self, endpoint: BinanceEndpoint, method: str) -> Union[Response, Any, Dict]:
         """
         Method to extract data from public APIs from Binance
         """
-
-        if BinanceEndpoint.KLINE_FQDN:
-            url = endpoint.format(self.symbol, self.interval,self.start_time, self.end_time, self.limit) 
-            data = api_handler(method, url, self.api_key, self.secret)
-            columns = ['Open time','Open High','Low Close',
-                       'Volume','Close time','Quote asset volume'
-                       'Number of trades','Taker buy base asset volume',
-                       'Taker buy quote asset volume','Ignore']
-            return dict(zip(columns, zip(*data)))
-        elif BinanceEndpoint.TEST_FQDN or \
-                BinanceEndpoint.TIME_FQDN or \
-                BinanceEndpoint.INFO_FQDN:
-            return api_handler(method, endpoint.value, self.api_key, self.secret ) 
-        elif BinanceEndpoint.ORDERBOOK_FQDN or \
-                BinanceEndpoint.HISTORICAL_FQDN or \
-                BinanceEndpoint.TRADES_FQDN:
-            url = endpoint.format(self.symbol, self.limit)
-            return api_handler(method, url, self.api_key, self.secret )
-        else:
-            raise ValueError('Value %s is not a public endpoint' % endpoint.value)
+        match method:
+            
+            case BinanceEndpoint.KLINE:
+                url = endpoint.format(self.symbol, self.interval,self.start_time, self.end_time, self.limit) 
+                print(url)
+                data = api_handler(method, url, self.api_key, self.secret)
+                columns = ['Open time','Open High','Low Close',
+                           'Volume','Close time','Quote asset volume'
+                           'Number of trades','Taker buy base asset volume',
+                           'Taker buy quote asset volume','Ignore']
+                return dict(zip(columns, zip(*data)))
+            case BinanceEndpoint.TEST | BinanceEndpoint.TIME | BinanceEndpoint.INFO:
+                return api_handler(method, endpoint.value, self.api_key, self.secret ) 
+            case BinanceEndpoint.ORDERBOOK | BinanceEndpoint.HISTORICAL | BinanceEndpoint.TRADES:
+                url = endpoint.format(self.symbol, self.limit)
+                return api_handler(method, url, self.api_key, self.secret )
+            case _:
+                raise ValueError('Value %s is not a public endpoint' % endpoint.value)
