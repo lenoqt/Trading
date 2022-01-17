@@ -1,10 +1,9 @@
+import ciso8601 as dt
 from typing import Any, Dict, Union, Optional
 from dataclasses import dataclass, field
 from requests import Response
-from datetime import datetime
 from trading.utils.endpoints import BinanceEndpoints, BinanceIntervals
 from trading.utils.handlers import api_handler
-
 
 __all__ = ['Binance']
 
@@ -13,26 +12,32 @@ __all__ = ['Binance']
 class Binance:
     
     symbol: str
-    start_time: datetime 
-    end_time: datetime
+    start_time: str # Should be a ISO8601 i.e 2016-09-01 10:11:12.123456 
+    end_time: str # Should be a ISO8601 i.e 2016-09-01 10:11:12.123456
     interval: BinanceIntervals = field(default=BinanceIntervals.INTERVAL_4H, repr=True)
     api_key: Optional[str] = None
     secret: Optional[str] = None
     limit: int = 1000
+    __start: Any = field(init=False)
+    __end: Any = field(init=False)
     
     def __post__init__(self):
-        if self.start_time >= self.end_time:
-            raise ValueError(f"Value {self.start_time}, can't be greater than {self.end_time}")
+        self.__start = dt.parse_datetime(self.start_time)
+        self.__end = dt.parse_datetime(self.end_time)
+        if self.__start >= self.__end:
+            raise ValueError(f"Value {self.start_time}, cannot be greater than {self.end_time}")
+        self.__start = self.__start.strftime("%s%f")[:13]
+        self.__end = self.__end.strftime("%s%f")[:13]
+
     
-    def public(self, endpoint: BinanceEndpoints, method: str) -> Union[Response, Any, Dict]:
+    def public_endpoints(self, endpoint: BinanceEndpoints, method: str) -> Union[Response, Any, Dict]:
         """
         Method to extract data from public APIs from Binance
         API Key or Secret is not necessary for this instance.
         """
         match endpoint:
-            
             case BinanceEndpoints.KLINE:
-                url = endpoint.format(self.symbol, self.interval,self.start_time, self.end_time, self.limit) 
+                url = endpoint.format(self.symbol, self.interval, self.__start, self.__end, self.limit) 
                 data = api_handler(method, url)
                 # TODO: Eliminate boilerplate code like this
                 columns = ['Open time','Open','High',
@@ -48,3 +53,6 @@ class Binance:
                 return api_handler(method, url)
             case _:
                 raise ValueError('Value %s is not a public endpoint' % endpoint.value)
+
+    def private_endpoints(self):
+        raise NotImplemented
