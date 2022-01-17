@@ -21,7 +21,7 @@ class Binance:
     __start: Any = field(init=False)
     __end: Any = field(init=False)
     
-    def __post__init__(self):
+    def __post_init__(self):
         self.__start = dt.parse_datetime(self.start_time)
         self.__end = dt.parse_datetime(self.end_time)
         if self.__start >= self.__end:
