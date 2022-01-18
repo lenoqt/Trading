@@ -49,6 +49,8 @@ class Binance:
             case BinanceEndpoints.TEST | BinanceEndpoints.TIME | BinanceEndpoints.INFO:
                 return api_handler(method, endpoint.value) 
             case BinanceEndpoints.ORDERBOOK | BinanceEndpoints.HISTORICAL | BinanceEndpoints.TRADES:
+                if BinanceEndpoints.HISTORICAL and self.api_key == None:
+                    raise ValueError("Set api_key in order to access to historical data")
                 url = endpoint.format(self.symbol, self.limit)
                 return api_handler(method, url)
             case _:
