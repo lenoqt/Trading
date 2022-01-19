@@ -34,7 +34,8 @@ jobs:
     - name: Install dependecies
       if: steps.cache-pipenv.outputs.cache-hit != 'true'
       run: |
-        pipenv install --deploy --dev 
+        pipenv install -r requirements_dev.txt 
+        pipenv install tox tox-gh-actions
     
     - name: Test with tox
       run: tox
