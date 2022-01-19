@@ -1,5 +1,5 @@
-# type: ignore 
-# mypy does not support match statements https://github.com/python/mypy/issues/11829 
+# type: ignore
+# mypy does not support match statements https://github.com/python/mypy/issues/11829
 import ciso8601 as dt
 from typing import Any, Dict, Union, Optional
 from dataclasses import dataclass, field
