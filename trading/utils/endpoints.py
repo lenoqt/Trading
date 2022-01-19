@@ -24,7 +24,7 @@ class BinanceEndpoints(BaseEnum):
     _AVGPRICE = "/api/v3/avgPrice"
     _DAYSTATS = "/api/v3/ticker/24hr"
     _SYMBOLTPRICE = "/api/v3/ticker/price"
-    _SYMBOOKT = "/api/v3/ticker/bookTicker"
+    _SYMBOOKT = "/api/v3/ticker/bookTicker"
     # FQDNs
     KLINE = (
         BASE_URL + _KLINES + "?symbol={}&interval={}&startTime={}&endTime={}&limit={}"
@@ -35,6 +35,11 @@ class BinanceEndpoints(BaseEnum):
     ORDERBOOK = BASE_URL + _ORDERBOOK + "?symbol={}&limit={}"
     HISTORICAL = BASE_URL + _HISTORICAL + "?symbol={}&limit={}"
     TRADES = BASE_URL + _TRADES + "?symbol={}&limit={}"
+    AGGREGATED = BASE_URL + _AGGREGATED + "?symbol={}&limit={}"
+    AVGPRICE = BASE_URL + _AVGPRICE + "?symbol={}"
+    DAYSTATS = BASE_URL + _DAYSTATS + "?symbol={}"
+    SYMBOLTPRICE = BASE_URL + _SYMBOLTPRICE + "?symbol={}"
+    SYMBOOKT = BASE_URL + _SYMBOOKT + "?symbol={}"
 
 
 class BinanceIntervals(BaseEnum):

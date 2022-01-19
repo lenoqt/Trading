@@ -37,20 +37,20 @@ def test_object(binance):
     ],
 )
 def test_kline(binance, primary_keys_expected):
-    kline_data = binance.public_endpoints(utils.BinanceEndpoints.KLINE, "GET")
+    kline_data = binance.public_data(utils.BinanceEndpoints.KLINE, "GET")
     assert isinstance(kline_data, dict)
     assert len(kline_data) == 12
     assert primary_keys_expected in kline_data
 
 
 def test_time(binance):
-    time_data = binance.public_endpoints(utils.BinanceEndpoints.TIME, "GET")
+    time_data = binance.public_data(utils.BinanceEndpoints.TIME, "GET")
     assert "serverTime" in time_data
     assert len(time_data) == 1
 
 
 def test_test(binance):
-    test_data = binance.public_endpoints(utils.BinanceEndpoints.TEST, "GET")
+    test_data = binance.public_data(utils.BinanceEndpoints.TEST, "GET")
     assert test_data == {}
 
 
@@ -59,16 +59,21 @@ def test_test(binance):
     ["timezone", "serverTime", "rateLimits", "exchangeFilters", "symbols"],
 )
 def test_info(binance, primary_keys_expected):
-    info_data = binance.public_endpoints(utils.BinanceEndpoints.INFO, "GET")
+    info_data = binance.public_data(utils.BinanceEndpoints.INFO, "GET")
     assert primary_keys_expected in info_data
 
 
 @pytest.mark.parametrize("primary_keys_expected", ["lastUpdateId", "bids", "asks"])
 def test_orderbook(binance, primary_keys_expected):
-    info_orderbook = binance.public_endpoints(utils.BinanceEndpoints.ORDERBOOK, "GET")
+    info_orderbook = binance.public_data(utils.BinanceEndpoints.ORDERBOOK, "GET")
     assert primary_keys_expected in info_orderbook
 
 
 def test_historical(binance):
     with pytest.raises(ValueError, match=r".* api_key .*"):
-        binance.public_endpoints(utils.BinanceEndpoints.HISTORICAL, "GET")
+        binance.public_data(utils.BinanceEndpoints.HISTORICAL, "GET")
+
+
+def test_trades(binance):
+    info_trades = binance.public_data(utils.BinanceEndpoints.TRADES, "GET")
+    assert len(info_trades) == binance.limit

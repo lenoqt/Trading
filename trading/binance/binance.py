@@ -32,7 +32,7 @@ class Binance:
         self.__start = self.__start.strftime("%s%f")[:13]
         self.__end = self.__end.strftime("%s%f")[:13]
 
-    def public_endpoints(self, endpoint: BinanceEndpoints, method: str) -> Union[Response, Any, Dict]:
+    def public_data(self, endpoint: BinanceEndpoints, method: str) -> Union[Response, Any, Dict]:
         """
         Method to extract data from public APIs from Binance
         API Key or Secret is not necessary for this instance,
@@ -49,15 +49,27 @@ class Binance:
                            'Number of trades', 'Taker buy base asset volume',
                            'Taker buy quote asset volume', 'Ignore']
                 return dict(zip(columns, zip(*data)))
-            case BinanceEndpoints.TEST | BinanceEndpoints.TIME | BinanceEndpoints.INFO:
+
+            case (BinanceEndpoints.TEST | BinanceEndpoints.TIME | BinanceEndpoints.INFO):
                 return api_handler(method, endpoint.value)
-            case BinanceEndpoints.ORDERBOOK | BinanceEndpoints.HISTORICAL | BinanceEndpoints.TRADES:
+
+            case (BinanceEndpoints.ORDERBOOK
+                    | BinanceEndpoints.HISTORICAL
+                    | BinanceEndpoints.TRADES
+                    | BinanceEndpoints.AGGREGATED):
                 if endpoint == BinanceEndpoints.HISTORICAL and self.api_key is None:
                     raise ValueError("Set api_key in order to access to historical data")
                 url = endpoint.format(self.symbol, self.limit)
                 return api_handler(method, url)
+
+            case (BinanceEndpoints.AVGPRICE
+                  | BinanceEndpoints.DAYSTATS
+                  | BinanceEndpoints.SYMBOLTPRICE
+                  | BinanceEndpoints.SYMBOLTPRICE):
+                url = endpoint.format(self.symbol)
+                return api_handler(method, url)
             case _:
                 raise ValueError('Value %s is not a public endpoint' % endpoint.value)
 
-    def private_endpoints(self):
+    def private_data(self):
         raise NotImplementedError
