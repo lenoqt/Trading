@@ -42,6 +42,7 @@ reportUnusedClass = false
 reportUnusedFunction = false
 reportUnusedImport = false
 reportUnusedVariable = false
+reportMissingImports = false
 
 [tool.mypy]
 mypy_path = "trading"
