@@ -35,7 +35,6 @@ jobs:
       if: steps.cache-pipenv.outputs.cache-hit != 'true'
       run: |
         pipenv install -r requirements_dev.txt 
-
     
     - name: Test with tox
       run: tox
