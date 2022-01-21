@@ -1,3 +1,4 @@
+import json
 import trading.binance as bi
 import trading.utils as utils
 import pytest
@@ -26,3 +27,16 @@ def binance_with_apikey():
         api_key="a4db08b7-5729-4ba9-8c08-f2df493465a1",
     )
     return binance
+
+
+@pytest.fixture(scope="module")
+def endpoints():
+    with open("tests/endpoints.json") as infile:
+        d = json.loads(infile.read())
+        return d
+
+
+@pytest.fixture(scope="module")
+def rest_call(endpoints):
+    expected, test_obj = endpoints.popitem()
+    yield expected, utils.api_handler("GET", test_obj)

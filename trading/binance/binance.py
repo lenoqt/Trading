@@ -65,7 +65,7 @@ class Binance:
             case (BinanceEndpoints.AVGPRICE
                   | BinanceEndpoints.DAYSTATS
                   | BinanceEndpoints.SYMBOLTPRICE
-                  | BinanceEndpoints.SYMBOLTPRICE):
+                  | BinanceEndpoints.SYMBOOKT):
                 url = endpoint.format(self.symbol)
                 return api_handler(method, url)
             case _:

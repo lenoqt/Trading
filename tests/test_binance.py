@@ -74,6 +74,32 @@ def test_historical(binance):
         binance.public_data(utils.BinanceEndpoints.HISTORICAL, "GET")
 
 
+# TODO: Assert data content
 def test_trades(binance):
     info_trades = binance.public_data(utils.BinanceEndpoints.TRADES, "GET")
     assert len(info_trades) == binance.limit
+
+
+def test_aggregated(binance):
+    info_trades = binance.public_data(utils.BinanceEndpoints.TRADES, "GET")
+    assert len(info_trades) == binance.limit
+
+
+def test_avgprice(binance):
+    binance.public_data(utils.BinanceEndpoints.AVGPRICE, "GET")
+    assert 1
+
+
+def test_daystats(binance):
+    binance.public_data(utils.BinanceEndpoints.DAYSTATS, "GET")
+    assert 1
+
+
+def test_symbolprice(binance):
+    binance.public_data(utils.BinanceEndpoints.SYMBOLTPRICE, "GET")
+    assert 1
+
+
+def test_symbolbook(binance):
+    binance.public_data(utils.BinanceEndpoints.SYMBOOKT, "GET")
+    assert 1
