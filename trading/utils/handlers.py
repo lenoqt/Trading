@@ -47,7 +47,7 @@ def api_handler(
                     timer += 5
                     retries -= 1
                     api_handler(method, endpoint, api_key, secret, timer, retries)
-            case _:# TODO : Add shortcircuit in case of 500 errors 
+            case _:  # TODO : Add shortcircuit in case of 500 errors
                 print(f"\n{status} Server probably down...")
                 time.sleep(timer)
                 return r if debug else api_handler(method, endpoint, api_key, secret, timer)
