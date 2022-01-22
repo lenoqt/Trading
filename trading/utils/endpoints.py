@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-__all__ = ["BinanceEndpoints", "BinanceIntervals"]
+__all__ = ["BaseEnum", "BinanceEndpoints", "BinanceIntervals"]
 
 
 class BaseEnum(str, Enum):

@@ -1,11 +1,11 @@
 from requests import request, Response
+import time
 import hashlib
 import hmac
 import base64
 import re
 from functools import lru_cache
 from typing import Any, Dict, Union, Optional
-from time import time
 from requests.exceptions import HTTPError
 
 __all__ = ["api_handler", "signature"]
@@ -19,7 +19,10 @@ def api_handler(
     secret: Optional[str] = None,
     timer: int = 5,
     retries: int = 5,
+    debug: bool = False
 ) -> Union[Response, Any, Dict]:
+    if timer | retries < 0:
+        raise ValueError("Values for timer or retries have to be greater than zero!")
     r = {}
     try:
         message = re.search(r"\?([\s\S]*)$", endpoint)
@@ -36,22 +39,18 @@ def api_handler(
         r = r.json()
     except HTTPError as err:
         match status:
-            case 429 | 403:
+            # TODO: Add mechanism to update api_key in case of invalidated api_key
+            case 429 | 403 | 418:
                 if retries != 0:
-                    print(f"\n\r{err} API Response: {status}... {round(timer, 2)}secs")
+                    print(f"\n\r{err} : Retries = {retries}... Sleeping for {round(timer, 2)}s")
                     time.sleep(timer)
                     timer += 5
                     retries -= 1
-                    return api_handler(method, endpoint, api_key, secret, timer, retries)
-            case 418:
-                print(f"\n{status} API Key Banned!")
-                time.sleep(3600)
-                return api_handler(method, endpoint, api_key, secret, timer)
-            # 5xx: Server side errors
-            case _:
+                    api_handler(method, endpoint, api_key, secret, timer, retries)
+            case _:# TODO : Add shortcircuit in case of 500 errors 
                 print(f"\n{status} Server probably down...")
-                time.sleep(3600)
-                return api_handler(method, endpoint, api_key, secret, timer)
+                time.sleep(timer)
+                return r if debug else api_handler(method, endpoint, api_key, secret, timer)
     finally:
         return r
 
@@ -63,4 +62,4 @@ def signature(
     message = bytes(message, encoding)
     hashed = hmac.new(secret, message, hashlib.sha256)
     hashed.hexdigest()
-    return base64.b64encode(hash.digest())
+    return base64.b64encode(hashed.digest())

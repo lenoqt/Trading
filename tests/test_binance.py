@@ -103,3 +103,13 @@ def test_symbolprice(binance):
 def test_symbolbook(binance):
     binance.public_data(utils.BinanceEndpoints.SYMBOOKT, "GET")
     assert 1
+
+
+def test_invalid_endpoint(binance):
+    with pytest.raises(ValueError, match=r".* public .*"):
+        binance.public_data(utils.BinanceEndpoints.BASE_URL, "GET")
+
+
+def test_private(binance):
+    with pytest.raises(NotImplementedError):
+        binance.private_data()

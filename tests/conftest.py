@@ -1,7 +1,7 @@
 import json
+import pytest
 import trading.binance as bi
 import trading.utils as utils
-import pytest
 
 
 @pytest.fixture(scope="session")
@@ -39,4 +39,11 @@ def endpoints():
 @pytest.fixture(scope="module")
 def rest_call(endpoints):
     expected, test_obj = endpoints.popitem()
-    yield expected, utils.api_handler("GET", test_obj)
+    yield expected, utils.api_handler("GET", test_obj, retries=0, debug=True)
+
+
+@pytest.fixture
+def signed():
+    secret = "abc-def-123"
+    message = "hello world"
+    return utils.signature(secret, message)
