@@ -19,7 +19,7 @@ def api_handler(
     secret: Optional[str] = None,
     timer: int = 5,
     retries: int = 5,
-    debug: bool = False
+    debug: bool = False,
 ) -> Union[Response, Any, Dict]:
     if timer | retries < 0:
         raise ValueError("Values for timer or retries have to be greater than zero!")
@@ -42,7 +42,9 @@ def api_handler(
             # TODO: Add mechanism to update api_key in case of invalidated api_key
             case 429 | 403 | 418:
                 if retries != 0:
-                    print(f"\n\r{err} : Retries = {retries}... Sleeping for {round(timer, 2)}s")
+                    print(
+                        f"\n\r{err} : Retries = {retries}... Sleeping for {round(timer, 2)}s"
+                    )
                     time.sleep(timer)
                     timer += 5
                     retries -= 1
@@ -50,7 +52,11 @@ def api_handler(
             case _:  # TODO : Add shortcircuit in case of 500 errors
                 print(f"\n{status} Server probably down...")
                 time.sleep(timer)
-                return r if debug else api_handler(method, endpoint, api_key, secret, timer)
+                return (
+                    r
+                    if debug
+                    else api_handler(method, endpoint, api_key, secret, timer)
+                )
     finally:
         return r
 
