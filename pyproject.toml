@@ -61,5 +61,5 @@ no_implicit_reexport = true
 
 [tool.black]
 line-length = 88
-target-version = ['py310']
+target_version = ['py310']
 include = '\.pyi?$'

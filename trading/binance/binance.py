@@ -1,11 +1,17 @@
 # mypy: ignore-errors
 """mypy does not support match statements https://github.com/python/mypy/issues/11829
 """
+from dataclasses import dataclass
+from dataclasses import field
+from typing import Any
+from typing import Dict
+from typing import Optional
+from typing import Union
+
 import ciso8601 as dt
-from typing import Any, Dict, Union, Optional
-from dataclasses import dataclass, field
 from requests import Response
-from trading.utils.endpoints import BinanceEndpoints, BinanceIntervals
+from trading.utils.endpoints import BinanceEndpoints
+from trading.utils.endpoints import BinanceIntervals
 from trading.utils.handlers import api_handler
 
 __all__ = ["Binance"]
@@ -25,6 +31,15 @@ class Binance:
     __end: Any = field(init=False)
 
     def __post_init__(self):
+        """
+        The __post_init__ function is a special function that gets called after the class constructor.
+        It's used to perform additional initialization when we create objects from a class.
+        In this case, we're using it to parse the start and end times into Unix timestamps.
+
+        :param self: Used to refer to the instance of the class.
+        :return: the string representation of the datetime object.
+
+        """
         self.__start = dt.parse_datetime(self.start_time)
         self.__end = dt.parse_datetime(self.end_time)
         if self.__start >= self.__end:
@@ -38,7 +53,13 @@ class Binance:
         self, endpoint: BinanceEndpoints, method: str
     ) -> Union[Response, Any, Dict]:
         """
-        Method to extract data from public APIs from Binance
+        The public_data function is used to extract data from the public APIs of Binance.
+        API Key or Secret is not necessary for this instance, except for the case of HISTORICAL endpoint.
+
+        :param self: Used to access to the attributes and methods of the class.
+        :param endpoint:BinanceEndpoints: Used to specify the endpoint.
+        :param method:str: Used to specify the HTTP method to be used for the request.
+        :return: a dictionary with the data of interest.
         API Key or Secret is not necessary for this instance,
         except for the case of HISTORICAL endpoint.
         """
@@ -95,4 +116,8 @@ class Binance:
                 raise ValueError("Value %s is not a public endpoint" % endpoint.value)
 
     def private_data(self):
+        """
+        :param self: Used to access variables that belongs to the class.
+        :return:
+        """
         raise NotImplementedError

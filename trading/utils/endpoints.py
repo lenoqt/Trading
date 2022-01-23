@@ -6,6 +6,12 @@ __all__ = ["BaseEnum", "BinanceEndpoints", "BinanceIntervals"]
 
 class BaseEnum(str, Enum):
     def describe(self):
+        """
+        The describe function prints out the name and its value.
+
+        :param self: Used to access variables that belong to the class.
+        :return: name, value
+        """
         return self.name, self.value
 
 

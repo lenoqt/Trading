@@ -1,11 +1,16 @@
-from requests import request, Response
-import time
+import base64
 import hashlib
 import hmac
-import base64
 import re
+import time
 from functools import lru_cache
-from typing import Any, Dict, Union, Optional
+from typing import Any
+from typing import Dict
+from typing import Optional
+from typing import Union
+
+from requests import request
+from requests import Response
 from requests.exceptions import HTTPError
 
 __all__ = ["api_handler", "signature"]
@@ -21,6 +26,21 @@ def api_handler(
     retries: int = 5,
     debug: bool = False,
 ) -> Union[Response, Any, Dict]:
+    """
+    The api_handler function is used to handle the requests made to the Binance API and several others API.
+    It takes in a method, endpoint and api_key as arguments. The method can be either GET or POST.
+    The endpoint is the url that you want to make a request on and api_key is your personal API.
+
+    :param method:str: Used to specify the HTTP method used to query the API.
+    :param endpoint:str: Used to specify the endpoint of the API.
+    :param api_key:Optional[str]=None: Used to pass an api_key to the function.
+    :param secret:Optional[str]=None: Used to pass the secret key to the function.
+    :param timer:int=5: Used to define the time to sleep between retries.
+    :param retries:int=5: Used to define the number of retries in case of 429 or 403 errors.
+    :param debug:bool=False: Used to print the response in case of an error.
+    :param : Used to pass the api_key and secret to the function.
+    :return: the response of the request, if it is successful.
+    """
     if timer | retries < 0:
         raise ValueError("Values for timer or retries have to be greater than zero!")
     r = {}
@@ -64,6 +84,17 @@ def api_handler(
 def signature(
     secret: Union[bytes, str], message: Union[bytes, str], encoding: str = "utf-8"
 ) -> bytes:
+    """
+    The signature function takes the secret key and message as arguments. It then hashes the message using
+    the secret key, which is a combination of both strings. The output is in bytes.
+
+    :param secret:Union[bytes: Used to pass a secret key to the function.
+    :param str]: Used to specify the encoding of the secret and message.
+    :param message:Union[bytes: Used to accept either a string or bytes object.
+    :param str]: Used to specify the type of data that is being passed into the function.
+    :param encoding:str="utf-8": Used to specify the encoding of the secret and message.
+    :return: a string containing the hash value of a message.
+    """
     secret = bytes(secret, encoding)
     message = bytes(message, encoding)
     hashed = hmac.new(secret, message, hashlib.sha256)
