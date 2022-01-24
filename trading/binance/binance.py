@@ -68,7 +68,12 @@ class Binance:
                 url = endpoint.format(
                     self.symbol, self.interval, self.__start, self.__end, self.limit
                 )
-                data = api_handler(method, url)
+                data = api_handler(
+                    method=method,
+                    endpoint=url,
+                    api_key=self.api_key,
+                    secret=self.secret,
+                )
                 # TODO: Eliminate boilerplate code like this
                 columns = [
                     "Open time",
@@ -89,7 +94,12 @@ class Binance:
             case (
                 BinanceEndpoints.TEST | BinanceEndpoints.TIME | BinanceEndpoints.INFO
             ):
-                return api_handler(method, endpoint.value)
+                return api_handler(
+                    method=method,
+                    endpoint=endpoint.value,
+                    api_key=self.api_key,
+                    secret=self.secret,
+                )
 
             case (
                 BinanceEndpoints.ORDERBOOK
@@ -102,7 +112,12 @@ class Binance:
                         "Set api_key in order to access to historical data"
                     )
                 url = endpoint.format(self.symbol, self.limit)
-                return api_handler(method, url)
+                return api_handler(
+                    method=method,
+                    endpoint=url,
+                    api_key=self.api_key,
+                    secret=self.secret,
+                )
 
             case (
                 BinanceEndpoints.AVGPRICE
@@ -111,9 +126,14 @@ class Binance:
                 | BinanceEndpoints.SYMBOOKT
             ):
                 url = endpoint.format(self.symbol)
-                return api_handler(method, url)
+                return api_handler(
+                    method=method,
+                    endpoint=url,
+                    api_key=self.api_key,
+                    secret=self.secret,
+                )
             case _:
-                raise ValueError("Value %s is not a public endpoint" % endpoint.value)
+                raise ValueError(f"Value {endpoint.value} is not a public endpoint")
 
     def private_data(self):
         """

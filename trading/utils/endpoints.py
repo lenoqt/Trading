@@ -18,7 +18,7 @@ class BaseEnum(str, Enum):
 class BinanceEndpoints(BaseEnum):
 
     BASE_URL = "https://api.binance.com"
-    # Endpoints (GET)
+    # Endpoints SPOT (GET)
     _TEST = "/api/v3/ping"
     _TIME = "/api/v3/time"
     _INFO = "/api/v3/exchangeInfo"
